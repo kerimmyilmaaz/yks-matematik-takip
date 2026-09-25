@@ -36,6 +36,25 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen selection:bg-indigo-100">
 
     <div id="app" class="max-w-5xl mx-auto px-4 py-8 relative">
+        
+        <!-- Auth Controls (Top Right) -->
+        <div class="flex justify-end mb-6">
+            <!-- Logged out state -->
+            <div id="auth-logged-out" class="flex gap-2 transition-all duration-300">
+                <button id="btn-login-modal" class="px-5 py-2.5 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors">Giriş Yap</button>
+                <button id="btn-register-modal" class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm rounded-xl transition-colors">Kayıt Ol</button>
+            </div>
+            <!-- Logged in state -->
+            <div id="auth-logged-in" class="hidden items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 transition-all duration-300">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm uppercase">
+                    <span id="user-initial">U</span>
+                </div>
+                <span id="user-email" class="text-sm font-medium text-slate-700 max-w-[120px] sm:max-w-[200px] truncate"></span>
+                <div class="h-5 w-px bg-slate-200 mx-1"></div>
+                <button id="btn-logout" class="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors">Çıkış Yap</button>
+            </div>
+        </div>
+
         <header class="mb-10 text-center space-y-3">
             <div class="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-2xl mb-2 text-indigo-600">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -44,7 +63,7 @@
             <p class="text-slate-500 max-w-xl mx-auto">TYT ve AYT Matematik konularındaki ilerlemeni adım adım takip et, eksiklerini gör ve hedefine ulaş.</p>
             
             <div id="auth-status" class="mt-4 flex justify-center items-center gap-2 text-sm font-medium text-slate-500 h-6 bg-white py-1 px-4 rounded-full shadow-sm inline-flex">
-                <div class="loader inline-block"></div> Sunucuya bağlanılıyor...
+                <div class="loader inline-block"></div> Durum kontrol ediliyor...
             </div>
         </header>
 
@@ -106,8 +125,51 @@
             </div>
         </section>
         
-        <!-- Toast Notification -->
-        <div id="save-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-xl opacity-0 transform translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3">
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+            <div id="auth-modal-content" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 mx-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="modal-title" class="text-2xl font-bold text-slate-800">Giriş Yap</h2>
+                    <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <form id="auth-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">E-posta</label>
+                        <input type="email" id="email-input" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Şifre</label>
+                        <input type="password" id="password-input" required minlength="6" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
+                    </div>
+                    <div id="auth-error" class="hidden bg-red-50 text-red-600 text-sm p-3 rounded-lg font-medium border border-red-100"></div>
+                    <button type="submit" id="btn-submit-auth" class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm mt-2">Giriş Yap</button>
+                </form>
+                
+                <div class="mt-6 flex items-center gap-3">
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                    <span class="text-sm font-medium text-slate-400">veya</span>
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                </div>
+                
+                <button id="btn-google-auth" class="mt-6 w-full py-3.5 px-4 bg-white border-2 border-slate-100 hover:bg-slate-50 hover:border-slate-200 text-slate-700 font-semibold rounded-xl transition-all flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Google ile Devam Et
+                </button>
+            </div>
+        </div>
+
+        <!-- Warning Toast (Not logged in) -->
+        <div id="auth-warning-toast" class="fixed top-6 right-6 bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-2xl shadow-xl opacity-0 transform -translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3 z-40">
+            <div class="bg-amber-100 p-2 rounded-full">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <span class="font-medium text-sm">İlerlemeni kaydetmek için lütfen giriş yap!</span>
+        </div>
+
+        <!-- Success Toast -->
+        <div id="save-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-xl opacity-0 transform translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3 z-40">
             <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             <span class="font-medium">İlerlemen kaydedildi</span>
         </div>
@@ -115,7 +177,15 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'yks-math-tracker-v2';
@@ -132,8 +202,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        
         let currentUser = null;
         let isDataLoaded = false;
+        let saveTimeout = null;
+        let authMode = 'login'; 
 
         const topics = {
             tyt: [
@@ -156,8 +229,95 @@
         };
 
         let userProgress = { tyt: {}, ayt: {} };
-        let saveTimeout = null;
 
+        // --- AUTH UI LOGIC ---
+        const authModal = document.getElementById('auth-modal');
+        const authModalContent = document.getElementById('auth-modal-content');
+        const authForm = document.getElementById('auth-form');
+        const modalTitle = document.getElementById('modal-title');
+        const btnSubmitAuth = document.getElementById('btn-submit-auth');
+        const authError = document.getElementById('auth-error');
+
+        function showModal(mode) {
+            authMode = mode;
+            modalTitle.innerText = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
+            btnSubmitAuth.innerText = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
+            authError.classList.add('hidden');
+            
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+            setTimeout(() => {
+                authModal.classList.remove('opacity-0');
+                authModalContent.classList.remove('scale-95');
+                authModalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideModal() {
+            authModal.classList.add('opacity-0');
+            authModalContent.classList.remove('scale-100');
+            authModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                authModal.classList.remove('flex');
+                authModal.classList.add('hidden');
+                authForm.reset();
+            }, 300);
+        }
+
+        function getTurkishErrorMessage(error) {
+            switch(error.code) {
+                case 'auth/email-already-in-use': return 'Bu e-posta adresi zaten kullanımda.';
+                case 'auth/invalid-email': return 'Geçersiz e-posta adresi.';
+                case 'auth/weak-password': return 'Şifre çok zayıf (en az 6 karakter olmalı).';
+                case 'auth/user-not-found': return 'Kullanıcı bulunamadı.';
+                case 'auth/wrong-password': return 'Hatalı şifre.';
+                case 'auth/invalid-credential': return 'E-posta veya şifre hatalı.';
+                case 'auth/popup-closed-by-user': return 'Giriş penceresi kapatıldı.';
+                default: return 'Bir hata oluştu. Lütfen tekrar deneyin.';
+            }
+        }
+
+        document.getElementById('btn-login-modal').addEventListener('click', () => showModal('login'));
+        document.getElementById('btn-register-modal').addEventListener('click', () => showModal('register'));
+        document.getElementById('btn-close-modal').addEventListener('click', hideModal);
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            btnSubmitAuth.disabled = true;
+            btnSubmitAuth.innerText = 'Bekleniyor...';
+            
+            try {
+                if (authMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+                hideModal();
+            } catch (error) {
+                authError.innerText = getTurkishErrorMessage(error);
+                authError.classList.remove('hidden');
+            } finally {
+                btnSubmitAuth.disabled = false;
+                btnSubmitAuth.innerText = authMode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
+            }
+        });
+
+        document.getElementById('btn-google-auth').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                hideModal();
+            } catch (error) {
+                authError.innerText = getTurkishErrorMessage(error);
+                authError.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+        // --- CORE LOGIC ---
         function renderTopics() {
             const tytContainer = document.getElementById('tyt-list');
             const aytContainer = document.getElementById('ayt-list');
@@ -184,7 +344,6 @@
             label.className = "flex items-center p-3 rounded-2xl hover:bg-slate-100 cursor-pointer transition-all group";
             label.htmlFor = id;
 
-            // Checked states for text colors
             const textBaseColor = isChecked ? 'text-slate-400 line-through' : 'text-slate-700';
             const focusColor = type === 'tyt' ? 'group-hover:border-indigo-500' : 'group-hover:border-emerald-500';
 
@@ -207,9 +366,19 @@
         }
 
         function handleCheckboxChange(e, textSpan) {
-            if(!currentUser || !isDataLoaded) {
+            // IF NOT LOGGED IN, BLOCK AND SHOW WARNING
+            if(!currentUser) {
                 e.preventDefault();
                 e.target.checked = !e.target.checked; // Revert visually
+                
+                const warningToast = document.getElementById('auth-warning-toast');
+                warningToast.classList.remove('opacity-0', '-translate-y-4');
+                warningToast.classList.add('opacity-100', 'translate-y-0');
+                
+                setTimeout(() => {
+                    warningToast.classList.remove('opacity-100', 'translate-y-0');
+                    warningToast.classList.add('opacity-0', '-translate-y-4');
+                }, 3500);
                 return;
             }
 
@@ -259,7 +428,6 @@
         async function saveToFirestore() {
             if (!currentUser || !isDataLoaded) return;
             try {
-                // RULE 1: STRICT PATH
                 const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'yks_progress', 'math');
                 await setDoc(docRef, userProgress);
                 
@@ -276,12 +444,13 @@
 
         async function loadFromFirestore(uid) {
             try {
-                // RULE 1: STRICT PATH
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'yks_progress', 'math');
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     userProgress = docSnap.data();
+                } else {
+                    userProgress = { tyt: {}, ayt: {} };
                 }
                 
                 if(!userProgress.tyt) userProgress.tyt = {};
@@ -291,36 +460,50 @@
                 renderTopics();
             } catch (error) {
                 console.error("Yükleme hatası:", error);
-                isDataLoaded = true; // allow interaction even if load failed
+                isDataLoaded = true;
                 renderTopics(); 
             }
         }
 
-        async function initAuth() {
-            try {
-                // RULE 3: Auth Before Queries
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Giriş hatası:", error);
-                document.getElementById('auth-status').innerHTML = '<span class="text-red-500">Oturum açılamadı.</span>';
-            }
-        }
-
+        // --- AUTH LISTENER ---
         onAuthStateChanged(auth, (user) => {
+            const loggedOutDiv = document.getElementById('auth-logged-out');
+            const loggedInDiv = document.getElementById('auth-logged-in');
+            const statusDiv = document.getElementById('auth-status');
+
             if (user) {
                 currentUser = user;
-                document.getElementById('auth-status').innerHTML = '<svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span class="text-slate-600">İlerleme Buluta Kaydediliyor</span>';
+                
+                // Update UI
+                loggedOutDiv.classList.add('hidden');
+                loggedInDiv.classList.remove('hidden');
+                loggedInDiv.classList.add('flex');
+                
+                document.getElementById('user-email').innerText = user.email || user.displayName || 'Öğrenci';
+                document.getElementById('user-initial').innerText = (user.email || 'O')[0];
+                
+                statusDiv.innerHTML = '<svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span class="text-slate-600">Verilerin senkronize</span>';
+                
                 loadFromFirestore(user.uid);
+            } else {
+                currentUser = null;
+                
+                // Update UI
+                loggedInDiv.classList.add('hidden');
+                loggedInDiv.classList.remove('flex');
+                loggedOutDiv.classList.remove('hidden');
+                
+                statusDiv.innerHTML = '<span class="text-amber-500">Kayıt için Giriş Yapın</span>';
+                
+                // Reset progress visually
+                userProgress = { tyt: {}, ayt: {} };
+                isDataLoaded = false;
+                renderTopics();
             }
         });
 
-        renderTopics(); // Render unchecked default view initially
-        initAuth();
-
+        // Initialize unauthenticated view on load
+        renderTopics();
     </script>
 </body>
 </html>

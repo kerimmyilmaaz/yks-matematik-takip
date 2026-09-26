@@ -11,8 +11,9 @@
         .progress-transition { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .topic-checkbox:checked + div { background-color: #10B981; border-color: #10B981; }
         .topic-checkbox:checked + div svg { opacity: 1; }
-        
-        /* Loading Spinner */
+        .custom-checkbox:checked + div { background-color: #8B5CF6; border-color: #8B5CF6; }
+        .custom-checkbox:checked + div svg { opacity: 1; }
+
         .loader {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #6366f1;
@@ -21,12 +22,19 @@
             height: 16px;
             animation: spin 1s linear infinite;
         }
+        .btn-loader {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -37,14 +45,12 @@
 
     <div id="app" class="max-w-5xl mx-auto px-4 py-8 relative">
         
-        <!-- Auth Controls (Top Right) -->
+        <!-- Auth Controls -->
         <div class="flex justify-end mb-6">
-            <!-- Logged out state -->
             <div id="auth-logged-out" class="flex gap-2 transition-all duration-300">
                 <button id="btn-login-modal" class="px-5 py-2.5 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors">Giriş Yap</button>
                 <button id="btn-register-modal" class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm rounded-xl transition-colors">Kayıt Ol</button>
             </div>
-            <!-- Logged in state -->
             <div id="auth-logged-in" class="hidden items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 transition-all duration-300">
                 <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm uppercase">
                     <span id="user-initial">U</span>
@@ -57,18 +63,17 @@
 
         <header class="mb-10 text-center space-y-3">
             <div class="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-2xl mb-2 text-indigo-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
             </div>
             <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">YKS Matematik Hedef Panosu</h1>
             <p class="text-slate-500 max-w-xl mx-auto">TYT ve AYT Matematik konularındaki ilerlemeni adım adım takip et, eksiklerini gör ve hedefine ulaş.</p>
-            
             <div id="auth-status" class="mt-4 flex justify-center items-center gap-2 text-sm font-medium text-slate-500 h-6 bg-white py-1 px-4 rounded-full shadow-sm inline-flex">
                 <div class="loader inline-block"></div> Durum kontrol ediliyor...
             </div>
         </header>
 
+        <!-- TYT/AYT Progress Cards -->
         <section class="grid md:grid-cols-2 gap-6 mb-12">
-            <!-- TYT Progress -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-end mb-4">
                     <div>
@@ -82,8 +87,6 @@
                 </div>
                 <p id="tyt-count-text" class="text-sm font-medium text-slate-500 text-right">0 / 0 Konu Tamamlandı</p>
             </div>
-
-            <!-- AYT Progress -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-end mb-4">
                     <div>
@@ -99,97 +102,163 @@
             </div>
         </section>
 
-        <section class="grid md:grid-cols-2 gap-8">
-            <!-- TYT Topics -->
+        <!-- TYT/AYT Topic Lists -->
+        <section class="grid md:grid-cols-2 gap-8 mb-12">
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[600px]">
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50">
                     <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-indigo-500 block"></span> TYT Konu Listesi
                     </h3>
                 </div>
-                <div id="tyt-list" class="p-4 space-y-1 overflow-y-auto flex-1">
-                    <!-- Checkboxes will be injected here -->
-                </div>
+                <div id="tyt-list" class="p-4 space-y-1 overflow-y-auto flex-1"></div>
             </div>
-
-            <!-- AYT Topics -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[600px]">
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50">
                     <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-emerald-500 block"></span> AYT Konu Listesi
                     </h3>
                 </div>
-                <div id="ayt-list" class="p-4 space-y-1 overflow-y-auto flex-1">
-                    <!-- Checkboxes will be injected here -->
-                </div>
+                <div id="ayt-list" class="p-4 space-y-1 overflow-y-auto flex-1"></div>
             </div>
         </section>
-        
-        <!-- Auth Modal -->
-        <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-            <div id="auth-modal-content" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 mx-4">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 id="modal-title" class="text-2xl font-bold text-slate-800">Giriş Yap</h2>
-                    <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+
+        <!-- ===== CUSTOM RESOURCES SECTION ===== -->
+        <section id="custom-resources-section">
+            <!-- Section Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Kendi Kaynaklarım</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">YouTube kampları, kitaplar ve özel çalışma listelerini buraya ekle.</p>
                 </div>
-                <form id="auth-form" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">E-posta</label>
-                        <input type="email" id="email-input" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Şifre</label>
-                        <input type="password" id="password-input" required minlength="6" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
-                    </div>
-                    <div id="auth-error" class="hidden bg-red-50 text-red-600 text-sm p-3 rounded-lg font-medium border border-red-100"></div>
-                    <button type="submit" id="btn-submit-auth" class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm mt-2">Giriş Yap</button>
-                </form>
-                
-                <div class="mt-6 flex items-center gap-3">
-                    <div class="flex-1 h-px bg-slate-200"></div>
-                    <span class="text-sm font-medium text-slate-400">veya</span>
-                    <div class="flex-1 h-px bg-slate-200"></div>
-                </div>
-                
-                <button id="btn-google-auth" class="mt-6 w-full py-3.5 px-4 bg-white border-2 border-slate-100 hover:bg-slate-50 hover:border-slate-200 text-slate-700 font-semibold rounded-xl transition-all flex items-center justify-center gap-3">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                    Google ile Devam Et
+                <button id="btn-add-resource" class="flex items-center gap-2 px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    Yeni Kaynak Ekle
                 </button>
             </div>
-        </div>
 
-        <!-- Warning Toast (Not logged in) -->
-        <div id="auth-warning-toast" class="fixed top-6 right-6 bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-2xl shadow-xl opacity-0 transform -translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3 z-40">
-            <div class="bg-amber-100 p-2 rounded-full">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <!-- Custom Resource Progress Cards -->
+            <div id="custom-progress-cards" class="grid md:grid-cols-2 gap-6 mb-8"></div>
+
+            <!-- Custom Resource Topic Lists -->
+            <div id="custom-topic-lists" class="grid md:grid-cols-2 gap-8"></div>
+
+            <!-- Empty State -->
+            <div id="custom-empty-state" class="text-center py-16 px-8 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-violet-50 rounded-2xl mb-4 text-violet-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <p class="font-semibold text-slate-600 text-lg">Henüz özel kaynak eklemedin</p>
+                <p class="text-slate-400 text-sm mt-1">Yukarıdaki butona tıklayarak ilk kaynağını oluştur.</p>
             </div>
-            <span class="font-medium text-sm">İlerlemeni kaydetmek için lütfen giriş yap!</span>
-        </div>
+        </section>
+    </div>
 
-        <!-- Success Toast -->
-        <div id="save-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-xl opacity-0 transform translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3 z-40">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            <span class="font-medium">İlerlemen kaydedildi</span>
+    <!-- ===== AUTH MODAL ===== -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="auth-modal-content" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modal-title" class="text-2xl font-bold text-slate-800">Giriş Yap</h2>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">E-posta</label>
+                    <input type="email" id="email-input" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Şifre</label>
+                    <input type="password" id="password-input" required minlength="6" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800">
+                </div>
+                <div id="auth-error" class="hidden bg-red-50 text-red-600 text-sm p-3 rounded-lg font-medium border border-red-100"></div>
+                <button type="submit" id="btn-submit-auth" class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm mt-2">Giriş Yap</button>
+            </form>
+            <div class="mt-6 flex items-center gap-3">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-sm font-medium text-slate-400">veya</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
+            </div>
+            <button id="btn-google-auth" class="mt-6 w-full py-3.5 px-4 bg-white border-2 border-slate-100 hover:bg-slate-50 hover:border-slate-200 text-slate-700 font-semibold rounded-xl transition-all flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google ile Devam Et
+            </button>
         </div>
+    </div>
+
+    <!-- ===== ADD RESOURCE MODAL ===== -->
+    <div id="resource-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="resource-modal-content" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-lg transform scale-95 transition-transform duration-300 mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Yeni Kaynak Ekle</h2>
+                    <p class="text-sm text-slate-400 mt-1">Özel bir çalışma listesi oluştur.</p>
+                </div>
+                <button id="btn-close-resource-modal" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="resource-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Kaynağın Adı</label>
+                    <input type="text" id="resource-name-input" required placeholder="Örn: Hocalara Geldik YouTube Kampı" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                        Konular / Adımlar
+                        <span class="text-slate-400 font-normal ml-1">(her satıra bir konu)</span>
+                    </label>
+                    <textarea id="resource-topics-input" required rows="8" placeholder="Bölüm 1: Sayılar&#10;Bölüm 2: Cebir&#10;Bölüm 3: Geometri&#10;..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300 resize-none text-sm leading-relaxed"></textarea>
+                </div>
+                <div id="resource-error" class="hidden bg-red-50 text-red-600 text-sm p-3 rounded-lg font-medium border border-red-100"></div>
+                <button type="submit" id="btn-submit-resource" class="w-full py-3.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Kaynağı Kaydet
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== DELETE CONFIRM MODAL ===== -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="delete-modal-content" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-sm transform scale-95 transition-transform duration-300 mx-4 text-center">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-red-50 rounded-2xl mb-4 text-red-500">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Kaynağı Sil</h3>
+            <p class="text-slate-500 text-sm mb-6"><span id="delete-resource-name" class="font-semibold text-slate-700"></span> adlı kaynağı ve tüm ilerleme verilerini silmek istediğine emin misin?</p>
+            <div class="flex gap-3">
+                <button id="btn-cancel-delete" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors">Vazgeç</button>
+                <button id="btn-confirm-delete" class="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts -->
+    <div id="auth-warning-toast" class="fixed top-6 right-6 bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-2xl shadow-xl opacity-0 transform -translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3 z-40">
+        <div class="bg-amber-100 p-2 rounded-full">
+            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <span class="font-medium text-sm">İlerlemeni kaydetmek için lütfen giriş yap!</span>
+    </div>
+    <div id="save-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-xl opacity-0 transform translate-y-4 transition-all duration-300 pointer-events-none flex items-center gap-3 z-40">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span class="font-medium" id="save-toast-text">İlerlemen kaydedildi</span>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
-            getAuth, 
-            signInWithEmailAndPassword, 
-            createUserWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            GoogleAuthProvider,
-            signInWithPopup
+            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+            signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getFirestore, doc, getDoc, setDoc, deleteDoc,
+            collection, getDocs, addDoc, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ─── Firebase Config ───────────────────────────────────────────
         const appId = 'yks-math-tracker-v2';
-        
         const firebaseConfig = {
             apiKey: "AIzaSyD6lhSFWnmCaKNmtNl-6YnIpzEPej102W0",
             authDomain: "yks-matematik-5b0e3.firebaseapp.com",
@@ -201,103 +270,104 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db  = getFirestore(app);
         const auth = getAuth(app);
-        
-        let currentUser = null;
-        let isDataLoaded = false;
-        let saveTimeout = null;
-        let authMode = 'login'; 
 
+        // ─── State ─────────────────────────────────────────────────────
+        let currentUser    = null;
+        let isDataLoaded   = false;
+        let saveTimeout    = null;
+        let authMode       = 'login';
+        let userProgress   = { tyt: {}, ayt: {} };
+        let customResources = [];          // [ { id, name, topics:[], progress:{} } ]
+        let pendingDeleteId = null;
+
+        // Renk paleti – her kaynak sırayla farklı bir renk alır
+        const colorPalette = [
+            { accent:'violet', from:'from-violet-500', to:'to-violet-400', text:'text-violet-600', badge:'text-violet-500', dot:'bg-violet-500', ring:'focus:ring-violet-500', border:'focus:border-violet-500', hover:'group-hover:border-violet-500' },
+            { accent:'rose',   from:'from-rose-500',   to:'to-rose-400',   text:'text-rose-600',   badge:'text-rose-500',   dot:'bg-rose-500',   ring:'focus:ring-rose-500',   border:'focus:border-rose-500',   hover:'group-hover:border-rose-500'   },
+            { accent:'amber',  from:'from-amber-500',  to:'to-amber-400',  text:'text-amber-600',  badge:'text-amber-500',  dot:'bg-amber-500',  ring:'focus:ring-amber-500',  border:'focus:border-amber-500',  hover:'group-hover:border-amber-500'  },
+            { accent:'cyan',   from:'from-cyan-500',   to:'to-cyan-400',   text:'text-cyan-600',   badge:'text-cyan-500',   dot:'bg-cyan-500',   ring:'focus:ring-cyan-500',   border:'focus:border-cyan-500',   hover:'group-hover:border-cyan-500'   },
+            { accent:'fuchsia',from:'from-fuchsia-500',to:'to-fuchsia-400',text:'text-fuchsia-600',badge:'text-fuchsia-500',dot:'bg-fuchsia-500',ring:'focus:ring-fuchsia-500',border:'focus:border-fuchsia-500',hover:'group-hover:border-fuchsia-500'},
+            { accent:'teal',   from:'from-teal-500',   to:'to-teal-400',   text:'text-teal-600',   badge:'text-teal-500',   dot:'bg-teal-500',   ring:'focus:ring-teal-500',   border:'focus:border-teal-500',   hover:'group-hover:border-teal-500'   },
+        ];
+
+        // ─── Static Topics ─────────────────────────────────────────────
         const topics = {
-            tyt: [
-                "Temel Kavramlar", "Sayı Basamakları", "Bölme ve Bölünebilme", 
-                "EBOB - EKOK", "Rasyonel Sayılar", "Basit Eşitsizlikler", 
-                "Mutlak Değer", "Üslü Sayılar", "Köklü Sayılar", 
-                "Çarpanlara Ayırma", "Oran ve Orantı", "Sayı Problemleri",
-                "Kesir Problemleri", "Yaş Problemleri", "İşçi Problemleri",
-                "Hareket Problemleri", "Yüzde, Kar-Zarar Problemleri", 
-                "Karışım Problemleri", "Grafik Problemleri", "Rutin Olmayan Problemler",
-                "Kümeler", "Mantık", "Fonksiyonlar", "Polinomlar", 
-                "Permütasyon, Kombinasyon, Binom", "Olasılık", "Veri ve İstatistik"
-            ],
-            ayt: [
-                "Polinomlar", "İkinci Dereceden Denklemler", "İkinci Dereceden Fonksiyonlar (Parabol)", 
-                "Eşitsizlikler", "Trigonometri", "Logaritma", "Diziler", 
-                "Limit ve Süreklilik", "Türev", "Türev Uygulamaları", 
-                "İntegral", "İntegral Uygulamaları", "Sayma ve Olasılık"
-            ]
+            tyt: ["Temel Kavramlar","Sayı Basamakları","Bölme ve Bölünebilme","EBOB - EKOK","Rasyonel Sayılar","Basit Eşitsizlikler","Mutlak Değer","Üslü Sayılar","Köklü Sayılar","Çarpanlara Ayırma","Oran ve Orantı","Sayı Problemleri","Kesir Problemleri","Yaş Problemleri","İşçi Problemleri","Hareket Problemleri","Yüzde, Kar-Zarar Problemleri","Karışım Problemleri","Grafik Problemleri","Rutin Olmayan Problemler","Kümeler","Mantık","Fonksiyonlar","Polinomlar","Permütasyon, Kombinasyon, Binom","Olasılık","Veri ve İstatistik"],
+            ayt: ["Polinomlar","İkinci Dereceden Denklemler","İkinci Dereceden Fonksiyonlar (Parabol)","Eşitsizlikler","Trigonometri","Logaritma","Diziler","Limit ve Süreklilik","Türev","Türev Uygulamaları","İntegral","İntegral Uygulamaları","Sayma ve Olasılık"]
         };
 
-        let userProgress = { tyt: {}, ayt: {} };
-
-        // --- AUTH UI LOGIC ---
-        const authModal = document.getElementById('auth-modal');
+        // ════════════════════════════════════════════════════════════════
+        //  AUTH MODAL
+        // ════════════════════════════════════════════════════════════════
+        const authModal        = document.getElementById('auth-modal');
         const authModalContent = document.getElementById('auth-modal-content');
-        const authForm = document.getElementById('auth-form');
-        const modalTitle = document.getElementById('modal-title');
-        const btnSubmitAuth = document.getElementById('btn-submit-auth');
-        const authError = document.getElementById('auth-error');
+        const authForm         = document.getElementById('auth-form');
+        const modalTitle       = document.getElementById('modal-title');
+        const btnSubmitAuth    = document.getElementById('btn-submit-auth');
+        const authError        = document.getElementById('auth-error');
 
-        function showModal(mode) {
-            authMode = mode;
-            modalTitle.innerText = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
-            btnSubmitAuth.innerText = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
-            authError.classList.add('hidden');
-            
-            authModal.classList.remove('hidden');
-            authModal.classList.add('flex');
+        function openModal(overlayEl, contentEl) {
+            overlayEl.classList.remove('hidden');
+            overlayEl.classList.add('flex');
             setTimeout(() => {
-                authModal.classList.remove('opacity-0');
-                authModalContent.classList.remove('scale-95');
-                authModalContent.classList.add('scale-100');
+                overlayEl.classList.remove('opacity-0');
+                contentEl.classList.remove('scale-95');
+                contentEl.classList.add('scale-100');
             }, 10);
         }
-
-        function hideModal() {
-            authModal.classList.add('opacity-0');
-            authModalContent.classList.remove('scale-100');
-            authModalContent.classList.add('scale-95');
+        function closeModal(overlayEl, contentEl, onClosed) {
+            overlayEl.classList.add('opacity-0');
+            contentEl.classList.remove('scale-100');
+            contentEl.classList.add('scale-95');
             setTimeout(() => {
-                authModal.classList.remove('flex');
-                authModal.classList.add('hidden');
-                authForm.reset();
+                overlayEl.classList.remove('flex');
+                overlayEl.classList.add('hidden');
+                if (onClosed) onClosed();
             }, 300);
         }
 
-        function getTurkishErrorMessage(error) {
-            switch(error.code) {
-                case 'auth/email-already-in-use': return 'Bu e-posta adresi zaten kullanımda.';
-                case 'auth/invalid-email': return 'Geçersiz e-posta adresi.';
-                case 'auth/weak-password': return 'Şifre çok zayıf (en az 6 karakter olmalı).';
-                case 'auth/user-not-found': return 'Kullanıcı bulunamadı.';
-                case 'auth/wrong-password': return 'Hatalı şifre.';
-                case 'auth/invalid-credential': return 'E-posta veya şifre hatalı.';
-                case 'auth/popup-closed-by-user': return 'Giriş penceresi kapatıldı.';
-                default: return 'Bir hata oluştu. Lütfen tekrar deneyin.';
-            }
+        function showAuthModal(mode) {
+            authMode = mode;
+            modalTitle.innerText      = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
+            btnSubmitAuth.innerText   = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
+            authError.classList.add('hidden');
+            openModal(authModal, authModalContent);
+        }
+        function hideAuthModal() {
+            closeModal(authModal, authModalContent, () => authForm.reset());
         }
 
-        document.getElementById('btn-login-modal').addEventListener('click', () => showModal('login'));
-        document.getElementById('btn-register-modal').addEventListener('click', () => showModal('register'));
-        document.getElementById('btn-close-modal').addEventListener('click', hideModal);
+        function getTurkishError(error) {
+            const map = {
+                'auth/email-already-in-use':'Bu e-posta adresi zaten kullanımda.',
+                'auth/invalid-email':'Geçersiz e-posta adresi.',
+                'auth/weak-password':'Şifre çok zayıf (en az 6 karakter).',
+                'auth/user-not-found':'Kullanıcı bulunamadı.',
+                'auth/wrong-password':'Hatalı şifre.',
+                'auth/invalid-credential':'E-posta veya şifre hatalı.',
+                'auth/popup-closed-by-user':'Giriş penceresi kapatıldı.',
+            };
+            return map[error.code] || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        }
+
+        document.getElementById('btn-login-modal').addEventListener('click',    () => showAuthModal('login'));
+        document.getElementById('btn-register-modal').addEventListener('click', () => showAuthModal('register'));
+        document.getElementById('btn-close-modal').addEventListener('click',    hideAuthModal);
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email-input').value;
+            const email    = document.getElementById('email-input').value;
             const password = document.getElementById('password-input').value;
             btnSubmitAuth.disabled = true;
-            btnSubmitAuth.innerText = 'Bekleniyor...';
-            
+            btnSubmitAuth.innerHTML = '<span class="btn-loader"></span>';
             try {
-                if (authMode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                }
-                hideModal();
-            } catch (error) {
-                authError.innerText = getTurkishErrorMessage(error);
+                if (authMode === 'login') await signInWithEmailAndPassword(auth, email, password);
+                else                      await createUserWithEmailAndPassword(auth, email, password);
+                hideAuthModal();
+            } catch(err) {
+                authError.innerText = getTurkishError(err);
                 authError.classList.remove('hidden');
             } finally {
                 btnSubmitAuth.disabled = false;
@@ -306,205 +376,437 @@
         });
 
         document.getElementById('btn-google-auth').addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
             try {
-                await signInWithPopup(auth, provider);
-                hideModal();
-            } catch (error) {
-                authError.innerText = getTurkishErrorMessage(error);
+                await signInWithPopup(auth, new GoogleAuthProvider());
+                hideAuthModal();
+            } catch(err) {
+                authError.innerText = getTurkishError(err);
                 authError.classList.remove('hidden');
             }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
-        // --- CORE LOGIC ---
-        function renderTopics() {
-            const tytContainer = document.getElementById('tyt-list');
-            const aytContainer = document.getElementById('ayt-list');
-            
-            tytContainer.innerHTML = '';
-            aytContainer.innerHTML = '';
+        // ════════════════════════════════════════════════════════════════
+        //  ADD RESOURCE MODAL
+        // ════════════════════════════════════════════════════════════════
+        const resourceModal        = document.getElementById('resource-modal');
+        const resourceModalContent = document.getElementById('resource-modal-content');
+        const resourceForm         = document.getElementById('resource-form');
+        const resourceError        = document.getElementById('resource-error');
+        const btnSubmitResource    = document.getElementById('btn-submit-resource');
 
-            topics.tyt.forEach((topic, index) => {
-                tytContainer.appendChild(createCheckboxItem('tyt', topic, index));
-            });
-
-            topics.ayt.forEach((topic, index) => {
-                aytContainer.appendChild(createCheckboxItem('ayt', topic, index));
-            });
-
-            updateProgressBars();
+        function showResourceModal() {
+            if (!currentUser) { showWarningToast(); return; }
+            resourceError.classList.add('hidden');
+            resourceForm.reset();
+            openModal(resourceModal, resourceModalContent);
+        }
+        function hideResourceModal() {
+            closeModal(resourceModal, resourceModalContent, () => resourceForm.reset());
         }
 
-        function createCheckboxItem(type, topic, index) {
-            const id = `${type}-topic-${index}`;
-            const isChecked = userProgress[type] && userProgress[type][topic] ? true : false;
-            
+        document.getElementById('btn-add-resource').addEventListener('click',          showResourceModal);
+        document.getElementById('btn-close-resource-modal').addEventListener('click',  hideResourceModal);
+
+        resourceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name   = document.getElementById('resource-name-input').value.trim();
+            const raw    = document.getElementById('resource-topics-input').value;
+            const topics = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+
+            if (!name)          { resourceError.innerText = 'Kaynak adı boş bırakılamaz.';    resourceError.classList.remove('hidden'); return; }
+            if (!topics.length) { resourceError.innerText = 'En az bir konu/adım girmelisin.'; resourceError.classList.remove('hidden'); return; }
+
+            btnSubmitResource.disabled = true;
+            btnSubmitResource.innerHTML = '<span class="btn-loader"></span> Kaydediliyor...';
+
+            try {
+                await saveCustomResource(name, topics);
+                hideResourceModal();
+            } catch(err) {
+                console.error(err);
+                resourceError.innerText = 'Kaydetme sırasında bir hata oluştu.';
+                resourceError.classList.remove('hidden');
+            } finally {
+                btnSubmitResource.disabled = false;
+                btnSubmitResource.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Kaynağı Kaydet';
+            }
+        });
+
+        // ════════════════════════════════════════════════════════════════
+        //  DELETE CONFIRM MODAL
+        // ════════════════════════════════════════════════════════════════
+        const deleteModal        = document.getElementById('delete-modal');
+        const deleteModalContent = document.getElementById('delete-modal-content');
+
+        function showDeleteModal(resourceId, resourceName) {
+            pendingDeleteId = resourceId;
+            document.getElementById('delete-resource-name').innerText = resourceName;
+            openModal(deleteModal, deleteModalContent);
+        }
+        function hideDeleteModal() {
+            closeModal(deleteModal, deleteModalContent, () => { pendingDeleteId = null; });
+        }
+
+        document.getElementById('btn-cancel-delete').addEventListener('click', hideDeleteModal);
+        document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+            if (!pendingDeleteId) return;
+            await deleteCustomResource(pendingDeleteId);
+            hideDeleteModal();
+        });
+
+        // ════════════════════════════════════════════════════════════════
+        //  TOAST HELPERS
+        // ════════════════════════════════════════════════════════════════
+        function showWarningToast() {
+            const t = document.getElementById('auth-warning-toast');
+            t.classList.remove('opacity-0', '-translate-y-4');
+            t.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                t.classList.remove('opacity-100', 'translate-y-0');
+                t.classList.add('opacity-0', '-translate-y-4');
+            }, 3500);
+        }
+
+        function showSaveToast(msg = 'İlerlemen kaydedildi') {
+            const t = document.getElementById('save-toast');
+            document.getElementById('save-toast-text').innerText = msg;
+            t.classList.remove('opacity-0', 'translate-y-4');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-4'), 3000);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  STATIC TOPIC RENDERING (TYT / AYT)
+        // ════════════════════════════════════════════════════════════════
+        function renderTopics() {
+            ['tyt','ayt'].forEach(type => {
+                const container = document.getElementById(`${type}-list`);
+                container.innerHTML = '';
+                topics[type].forEach((topic, i) => container.appendChild(createStaticCheckbox(type, topic, i)));
+            });
+            updateStaticProgressBars();
+        }
+
+        function createStaticCheckbox(type, topic, index) {
+            const id        = `${type}-topic-${index}`;
+            const isChecked = userProgress[type]?.[topic] ?? false;
+            const hover     = type === 'tyt' ? 'group-hover:border-indigo-500' : 'group-hover:border-emerald-500';
+            const textCls   = isChecked ? 'text-slate-400 line-through' : 'text-slate-700';
+
             const label = document.createElement('label');
-            label.className = "flex items-center p-3 rounded-2xl hover:bg-slate-100 cursor-pointer transition-all group";
-            label.htmlFor = id;
-
-            const textBaseColor = isChecked ? 'text-slate-400 line-through' : 'text-slate-700';
-            const focusColor = type === 'tyt' ? 'group-hover:border-indigo-500' : 'group-hover:border-emerald-500';
-
+            label.className = 'flex items-center p-3 rounded-2xl hover:bg-slate-100 cursor-pointer transition-all group';
+            label.htmlFor   = id;
             label.innerHTML = `
                 <div class="relative flex items-center shrink-0">
                     <input type="checkbox" id="${id}" class="topic-checkbox sr-only" ${isChecked ? 'checked' : ''} data-type="${type}" data-topic="${topic}">
-                    <div class="w-6 h-6 border-2 border-slate-300 rounded-lg flex items-center justify-center transition-colors mr-4 ${focusColor} bg-white shadow-sm">
-                        <svg class="w-4 h-4 text-white opacity-0 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div class="w-6 h-6 border-2 border-slate-300 rounded-lg flex items-center justify-center transition-colors mr-4 ${hover} bg-white shadow-sm">
+                        <svg class="w-4 h-4 text-white opacity-0 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
                 </div>
-                <span class="font-medium select-none transition-all duration-300 ${textBaseColor}">${topic}</span>
-            `;
+                <span class="font-medium select-none transition-all duration-300 ${textCls}">${topic}</span>`;
 
-            const checkbox = label.querySelector('input');
-            checkbox.addEventListener('change', (e) => handleCheckboxChange(e, label.querySelector('span')));
-
+            label.querySelector('input').addEventListener('change', (e) => handleStaticCheckbox(e, label.querySelector('span')));
             return label;
         }
 
-        function handleCheckboxChange(e, textSpan) {
-            // IF NOT LOGGED IN, BLOCK AND SHOW WARNING
-            if(!currentUser) {
-                e.preventDefault();
-                e.target.checked = !e.target.checked; // Revert visually
-                
-                const warningToast = document.getElementById('auth-warning-toast');
-                warningToast.classList.remove('opacity-0', '-translate-y-4');
-                warningToast.classList.add('opacity-100', 'translate-y-0');
-                
-                setTimeout(() => {
-                    warningToast.classList.remove('opacity-100', 'translate-y-0');
-                    warningToast.classList.add('opacity-0', '-translate-y-4');
-                }, 3500);
+        function handleStaticCheckbox(e, textSpan) {
+            if (!currentUser) {
+                e.target.checked = !e.target.checked;
+                showWarningToast();
                 return;
             }
+            const { type, topic } = e.target.dataset;
+            userProgress[type]          = userProgress[type] || {};
+            userProgress[type][topic]   = e.target.checked;
 
-            const type = e.target.dataset.type;
-            const topic = e.target.dataset.topic;
-            const isChecked = e.target.checked;
+            if (e.target.checked) { textSpan.classList.add('text-slate-400','line-through'); textSpan.classList.remove('text-slate-700'); }
+            else                  { textSpan.classList.remove('text-slate-400','line-through'); textSpan.classList.add('text-slate-700'); }
 
-            if(!userProgress[type]) userProgress[type] = {};
-            userProgress[type][topic] = isChecked;
-            
-            if(isChecked) {
-                textSpan.classList.add('text-slate-400', 'line-through');
-                textSpan.classList.remove('text-slate-700');
-            } else {
-                textSpan.classList.remove('text-slate-400', 'line-through');
-                textSpan.classList.add('text-slate-700');
-            }
-
-            updateProgressBars();
-            scheduleSave();
+            updateStaticProgressBars();
+            scheduleStaticSave();
         }
 
-        function updateProgressBars() {
-            ['tyt', 'ayt'].forEach(type => {
-                const total = topics[type].length;
-                let completed = 0;
-                
-                if(userProgress[type]) {
-                    topics[type].forEach(topic => {
-                        if (userProgress[type][topic]) completed++;
-                    });
-                }
-
-                const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-                
-                document.getElementById(`${type}-percentage`).innerText = `${percentage}%`;
-                document.getElementById(`${type}-progress-bar`).style.width = `${percentage}%`;
-                document.getElementById(`${type}-count-text`).innerText = `${completed} / ${total} Konu Tamamlandı`;
+        function updateStaticProgressBars() {
+            ['tyt','ayt'].forEach(type => {
+                const total     = topics[type].length;
+                const completed = topics[type].filter(t => userProgress[type]?.[t]).length;
+                const pct       = total ? Math.round(completed / total * 100) : 0;
+                document.getElementById(`${type}-percentage`).innerText  = `${pct}%`;
+                document.getElementById(`${type}-progress-bar`).style.width = `${pct}%`;
+                document.getElementById(`${type}-count-text`).innerText  = `${completed} / ${total} Konu Tamamlandı`;
             });
         }
 
-        function scheduleSave() {
+        function scheduleStaticSave() {
             if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveToFirestore, 1500); 
+            saveTimeout = setTimeout(saveStaticProgress, 1500);
         }
 
-        async function saveToFirestore() {
+        async function saveStaticProgress() {
             if (!currentUser || !isDataLoaded) return;
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'yks_progress', 'math');
-                await setDoc(docRef, userProgress);
-                
-                const toast = document.getElementById('save-toast');
-                toast.classList.remove('opacity-0', 'translate-y-4');
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'translate-y-4');
-                }, 3000);
+                const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'yks_progress', 'math');
+                await setDoc(ref, userProgress);
+                showSaveToast();
+            } catch(err) { console.error('Kaydetme hatası:', err); }
+        }
 
-            } catch (error) {
-                console.error("Kaydetme hatası:", error);
+        // ════════════════════════════════════════════════════════════════
+        //  CUSTOM RESOURCE RENDERING
+        // ════════════════════════════════════════════════════════════════
+        function renderCustomResources() {
+            const progressCards = document.getElementById('custom-progress-cards');
+            const topicLists    = document.getElementById('custom-topic-lists');
+            const emptyState    = document.getElementById('custom-empty-state');
+
+            progressCards.innerHTML = '';
+            topicLists.innerHTML    = '';
+
+            if (customResources.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            customResources.forEach((resource, idx) => {
+                const color = colorPalette[idx % colorPalette.length];
+                progressCards.appendChild(createResourceProgressCard(resource, color));
+                topicLists.appendChild(createResourceTopicList(resource, color));
+            });
+        }
+
+        function createResourceProgressCard(resource, color) {
+            const total     = resource.topics.length;
+            const completed = resource.topics.filter(t => resource.progress?.[t]).length;
+            const pct       = total ? Math.round(completed / total * 100) : 0;
+
+            const card = document.createElement('div');
+            card.id    = `card-${resource.id}`;
+            card.className = 'bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 hover:shadow-md transition-shadow relative group';
+            card.innerHTML = `
+                <button data-id="${resource.id}" data-name="${escHtml(resource.name)}"
+                    class="delete-resource-btn absolute top-5 right-5 p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <div class="flex justify-between items-end mb-4 pr-8">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider ${color.badge} mb-1 block">Özel Kaynak</span>
+                        <h2 class="text-xl font-bold text-slate-800 leading-tight">${escHtml(resource.name)}</h2>
+                    </div>
+                    <span id="pct-${resource.id}" class="text-4xl font-extrabold ${color.text} shrink-0 ml-3">${pct}%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-4 mb-3 overflow-hidden shadow-inner">
+                    <div id="bar-${resource.id}" class="bg-gradient-to-r ${color.from} ${color.to} h-full rounded-full progress-transition" style="width:${pct}%"></div>
+                </div>
+                <p id="cnt-${resource.id}" class="text-sm font-medium text-slate-500 text-right">${completed} / ${total} Adım Tamamlandı</p>`;
+
+            card.querySelector('.delete-resource-btn').addEventListener('click', (e) => {
+                const btn = e.currentTarget;
+                showDeleteModal(btn.dataset.id, btn.dataset.name);
+            });
+            return card;
+        }
+
+        function createResourceTopicList(resource, color) {
+            const wrapper = document.createElement('div');
+            wrapper.id    = `list-wrapper-${resource.id}`;
+            wrapper.className = 'bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[500px]';
+            wrapper.innerHTML = `
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full ${color.dot} block"></span>
+                        ${escHtml(resource.name)}
+                    </h3>
+                </div>
+                <div id="list-${resource.id}" class="p-4 space-y-1 overflow-y-auto flex-1"></div>`;
+
+            const listEl = wrapper.querySelector(`#list-${resource.id}`);
+            resource.topics.forEach((topic, i) => {
+                listEl.appendChild(createCustomCheckbox(resource, topic, i, color));
+            });
+
+            return wrapper;
+        }
+
+        function createCustomCheckbox(resource, topic, index, color) {
+            const id        = `custom-${resource.id}-${index}`;
+            const isChecked = resource.progress?.[topic] ?? false;
+            const textCls   = isChecked ? 'text-slate-400 line-through' : 'text-slate-700';
+
+            const label = document.createElement('label');
+            label.className = 'flex items-center p-3 rounded-2xl hover:bg-slate-100 cursor-pointer transition-all group';
+            label.htmlFor   = id;
+            label.innerHTML = `
+                <div class="relative flex items-center shrink-0">
+                    <input type="checkbox" id="${id}" class="custom-checkbox sr-only" ${isChecked ? 'checked' : ''}>
+                    <div class="w-6 h-6 border-2 border-slate-300 rounded-lg flex items-center justify-center transition-colors mr-4 ${color.hover} bg-white shadow-sm">
+                        <svg class="w-4 h-4 text-white opacity-0 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                </div>
+                <span class="font-medium select-none transition-all duration-300 ${textCls}">${escHtml(topic)}</span>`;
+
+            label.querySelector('input').addEventListener('change', (e) => handleCustomCheckbox(e, label.querySelector('span'), resource, topic));
+            return label;
+        }
+
+        function handleCustomCheckbox(e, textSpan, resource, topic) {
+            if (!currentUser) {
+                e.target.checked = !e.target.checked;
+                showWarningToast();
+                return;
+            }
+            resource.progress        = resource.progress || {};
+            resource.progress[topic] = e.target.checked;
+
+            if (e.target.checked) { textSpan.classList.add('text-slate-400','line-through'); textSpan.classList.remove('text-slate-700'); }
+            else                  { textSpan.classList.remove('text-slate-400','line-through'); textSpan.classList.add('text-slate-700'); }
+
+            updateCustomProgressBar(resource);
+            scheduleCustomSave(resource);
+        }
+
+        function updateCustomProgressBar(resource) {
+            const total     = resource.topics.length;
+            const completed = resource.topics.filter(t => resource.progress?.[t]).length;
+            const pct       = total ? Math.round(completed / total * 100) : 0;
+
+            const pctEl = document.getElementById(`pct-${resource.id}`);
+            const barEl = document.getElementById(`bar-${resource.id}`);
+            const cntEl = document.getElementById(`cnt-${resource.id}`);
+            if (pctEl) pctEl.innerText  = `${pct}%`;
+            if (barEl) barEl.style.width = `${pct}%`;
+            if (cntEl) cntEl.innerText  = `${completed} / ${total} Adım Tamamlandı`;
+        }
+
+        const customSaveTimers = {};
+        function scheduleCustomSave(resource) {
+            if (customSaveTimers[resource.id]) clearTimeout(customSaveTimers[resource.id]);
+            customSaveTimers[resource.id] = setTimeout(() => saveCustomProgress(resource), 1500);
+        }
+
+        async function saveCustomProgress(resource) {
+            if (!currentUser) return;
+            try {
+                const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'custom_resources', resource.id);
+                await setDoc(ref, { name: resource.name, topics: resource.topics, progress: resource.progress || {} }, { merge: true });
+                showSaveToast();
+            } catch(err) { console.error('Özel kaynak kaydetme hatası:', err); }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  FIRESTORE – CUSTOM RESOURCES CRUD
+        // ════════════════════════════════════════════════════════════════
+        async function saveCustomResource(name, topicsArr) {
+            const ref  = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'custom_resources');
+            const data = {
+                name,
+                topics:   topicsArr,
+                progress: {},
+                createdAt: serverTimestamp()
+            };
+            const docRef = await addDoc(ref, data);
+            customResources.push({ id: docRef.id, name, topics: topicsArr, progress: {} });
+            renderCustomResources();
+            showSaveToast('Kaynak eklendi! 🎉');
+        }
+
+        async function deleteCustomResource(resourceId) {
+            try {
+                const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'custom_resources', resourceId);
+                await deleteDoc(ref);
+                customResources = customResources.filter(r => r.id !== resourceId);
+                renderCustomResources();
+                showSaveToast('Kaynak silindi.');
+            } catch(err) { console.error('Silme hatası:', err); }
+        }
+
+        async function loadCustomResources(uid) {
+            try {
+                const ref   = collection(db, 'artifacts', appId, 'users', uid, 'custom_resources');
+                const snap  = await getDocs(ref);
+                customResources = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    customResources.push({
+                        id:       d.id,
+                        name:     data.name     || 'İsimsiz Kaynak',
+                        topics:   data.topics   || [],
+                        progress: data.progress || {}
+                    });
+                });
+                // Oluşturulma zamanına göre sırala (serverTimestamp olmadan fallback)
+                renderCustomResources();
+            } catch(err) {
+                console.error('Özel kaynak yükleme hatası:', err);
+                renderCustomResources();
             }
         }
 
+        // ════════════════════════════════════════════════════════════════
+        //  FIRESTORE – STATIC PROGRESS LOAD
+        // ════════════════════════════════════════════════════════════════
         async function loadFromFirestore(uid) {
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'yks_progress', 'math');
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    userProgress = docSnap.data();
-                } else {
-                    userProgress = { tyt: {}, ayt: {} };
-                }
-                
-                if(!userProgress.tyt) userProgress.tyt = {};
-                if(!userProgress.ayt) userProgress.ayt = {};
-                
+                const ref  = doc(db, 'artifacts', appId, 'users', uid, 'yks_progress', 'math');
+                const snap = await getDoc(ref);
+                userProgress = snap.exists() ? snap.data() : { tyt:{}, ayt:{} };
+                if (!userProgress.tyt) userProgress.tyt = {};
+                if (!userProgress.ayt) userProgress.ayt = {};
                 isDataLoaded = true;
                 renderTopics();
-            } catch (error) {
-                console.error("Yükleme hatası:", error);
+            } catch(err) {
+                console.error('Yükleme hatası:', err);
                 isDataLoaded = true;
-                renderTopics(); 
+                renderTopics();
             }
         }
 
-        // --- AUTH LISTENER ---
+        // ════════════════════════════════════════════════════════════════
+        //  AUTH STATE LISTENER
+        // ════════════════════════════════════════════════════════════════
         onAuthStateChanged(auth, (user) => {
-            const loggedOutDiv = document.getElementById('auth-logged-out');
-            const loggedInDiv = document.getElementById('auth-logged-in');
+            const loggedOut = document.getElementById('auth-logged-out');
+            const loggedIn  = document.getElementById('auth-logged-in');
             const statusDiv = document.getElementById('auth-status');
 
             if (user) {
                 currentUser = user;
-                
-                // Update UI
-                loggedOutDiv.classList.add('hidden');
-                loggedInDiv.classList.remove('hidden');
-                loggedInDiv.classList.add('flex');
-                
-                document.getElementById('user-email').innerText = user.email || user.displayName || 'Öğrenci';
-                document.getElementById('user-initial').innerText = (user.email || 'O')[0];
-                
-                statusDiv.innerHTML = '<svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span class="text-slate-600">Verilerin senkronize</span>';
-                
+                loggedOut.classList.add('hidden');
+                loggedIn.classList.remove('hidden');
+                loggedIn.classList.add('flex');
+                document.getElementById('user-email').innerText   = user.email || user.displayName || 'Öğrenci';
+                document.getElementById('user-initial').innerText = (user.email || user.displayName || 'O')[0].toUpperCase();
+                statusDiv.innerHTML = '<svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-slate-600">Verilerin senkronize</span>';
+
                 loadFromFirestore(user.uid);
+                loadCustomResources(user.uid);
             } else {
                 currentUser = null;
-                
-                // Update UI
-                loggedInDiv.classList.add('hidden');
-                loggedInDiv.classList.remove('flex');
-                loggedOutDiv.classList.remove('hidden');
-                
+                loggedIn.classList.add('hidden');
+                loggedIn.classList.remove('flex');
+                loggedOut.classList.remove('hidden');
                 statusDiv.innerHTML = '<span class="text-amber-500">Kayıt için Giriş Yapın</span>';
-                
-                // Reset progress visually
-                userProgress = { tyt: {}, ayt: {} };
-                isDataLoaded = false;
+                userProgress   = { tyt:{}, ayt:{} };
+                customResources = [];
+                isDataLoaded   = false;
                 renderTopics();
+                renderCustomResources();
             }
         });
 
-        // Initialize unauthenticated view on load
+        // ─── Utils ─────────────────────────────────────────────────────
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Init
         renderTopics();
+        renderCustomResources();
     </script>
 </body>
 </html>

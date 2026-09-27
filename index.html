@@ -6,6 +6,10 @@
     <title>YKS Matematik Takipçisi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Tesseract.js Kütüphanesi (Görselden Metin Okuma) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -352,22 +356,62 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════
-     ADD RESOURCE MODAL
+     ADD RESOURCE MODAL (WITH YOUTUBE & OCR)
 ════════════════════════════════════════════════════════════════════ -->
 <div id="resource-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
     <div id="resource-modal-content" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-lg transform scale-95 transition-transform duration-300 mx-4 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <div><h2 class="text-2xl font-bold text-slate-800">Yeni Kaynak Ekle</h2><p class="text-sm text-slate-400 mt-1">Özel bir çalışma listesi oluştur.</p></div>
-            <button id="btn-close-resource-modal" class="text-slate-400 hover:text-slate-600 transition-colors p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">Yeni Kaynak Ekle</h2>
+                <p class="text-sm text-slate-400 mt-1">Özel bir çalışma listesi oluştur.</p>
+            </div>
+            <button id="btn-close-resource-modal" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
+        
         <form id="resource-form" class="space-y-5">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <!-- YouTube Modülü -->
+                <div class="p-4 bg-red-50 rounded-xl border border-red-100 flex flex-col justify-between">
+                    <label class="block text-xs font-bold text-red-700 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        YouTube'dan Çek
+                    </label>
+                    <input type="text" id="yt-link-input" placeholder="Playlist linki..." class="w-full px-3 py-2 rounded-lg border border-red-200 focus:ring-2 focus:ring-red-500 outline-none text-sm bg-white mb-2">
+                    <button type="button" id="btn-fetch-yt" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors">Videoları Aktar</button>
+                    <div id="yt-error" class="hidden text-red-600 text-xs mt-2 font-medium"></div>
+                </div>
+
+                <!-- Kitap/OCR Modülü -->
+                <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 flex flex-col justify-between">
+                    <label class="block text-xs font-bold text-blue-700 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Kitaptan Tara
+                    </label>
+                    <input type="file" id="book-image-input" accept="image/*" class="hidden">
+                    <label for="book-image-input" class="w-full px-3 py-2 rounded-lg border border-blue-200 text-blue-700 text-sm text-center bg-white cursor-pointer hover:bg-blue-100 transition-colors mb-2 block truncate">
+                        Fotoğraf Seç...
+                    </label>
+                    <button type="button" id="btn-read-image" disabled class="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-semibold rounded-lg transition-colors">İçindekileri Oku</button>
+                    <div id="ocr-status" class="hidden text-blue-700 text-xs mt-2 font-medium flex items-center justify-center gap-1.5">
+                        <span class="loader border-blue-600 w-3 h-3"></span> Analiz ediliyor...
+                    </div>
+                    <div id="ocr-error" class="hidden text-red-600 text-xs mt-2 font-medium"></div>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1.5">Kaynağın Adı</label>
-                <input type="text" id="resource-name-input" required placeholder="Örn: Hocalara Geldik YouTube Kampı" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300">
+                <input type="text" id="resource-name-input" required placeholder="Örn: Limit YKS Matematik Soru Bankası" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Konular / Adımlar <span class="text-slate-400 font-normal ml-1">(her satıra bir konu)</span></label>
-                <textarea id="resource-topics-input" required rows="8" placeholder="Her satıra bir konu veya adım yaz..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300 resize-none text-sm leading-relaxed"></textarea>
+                <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Konular / Adımlar
+                    <span class="text-slate-400 font-normal ml-1">(Listeyi düzenleyebilirsin)</span>
+                </label>
+                <textarea id="resource-topics-input" required rows="6" placeholder="Manuel olarak yazabilir veya yukarıdaki butonlarla otomatik doldurabilirsin..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300 resize-none text-sm leading-relaxed"></textarea>
             </div>
             <div id="resource-error" class="hidden bg-red-50 text-red-600 text-sm p-3 rounded-lg font-medium border border-red-100"></div>
             <button type="submit" id="btn-submit-resource" class="w-full py-3.5 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
@@ -415,7 +459,9 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc,
          collection, getDocs, addDoc, orderBy, query, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// ── CONFIG ────────────────────────────────────────────────────────────
+// ── CONFIG & API KEYS ────────────────────────────────────────────────────────────
+const YOUTUBE_API_KEY = 'AIzaSyAL2I00AQ8NrW4LND2KOaiabZSx0kfe4jQ';
+
 const appId = 'yks-math-tracker-v2';
 const firebaseConfig = {
     apiKey:            "AIzaSyD6lhSFWnmCaKNmtNl-6YnIpzEPej102W0",
@@ -615,6 +661,134 @@ function scheduleStaticSave() {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+//  YOUTUBE API FETCH LOGIC
+// ════════════════════════════════════════════════════════════════════════
+const btnFetchYt = document.getElementById('btn-fetch-yt');
+const ytLinkInput = document.getElementById('yt-link-input');
+const ytError = document.getElementById('yt-error');
+const resourceTopicsInput = document.getElementById('resource-topics-input');
+
+btnFetchYt.addEventListener('click', async () => {
+    ytError.classList.add('hidden');
+    const link = ytLinkInput.value.trim();
+
+    if (!link) {
+        ytError.innerText = 'Lütfen geçerli bir oynatma listesi linki yapıştırın.';
+        ytError.classList.remove('hidden');
+        return;
+    }
+
+    const listMatch = link.match(/[?&]list=([^#\&\?]+)/);
+    if (!listMatch) {
+        ytError.innerText = 'Linkte bir oynatma listesi (list=...) bulunamadı.';
+        ytError.classList.remove('hidden');
+        return;
+    }
+
+    const playlistId = listMatch[1];
+    btnFetchYt.disabled = true;
+    btnFetchYt.innerHTML = '<span class="btn-loader"></span>';
+
+    try {
+        let allTitles = [];
+        let nextPageToken = '';
+        do {
+            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}${nextPageToken ? '&pageToken=' + nextPageToken : ''}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.error) throw new Error(data.error.message);
+
+            const titles = data.items
+                .map(item => item.snippet.title)
+                .filter(title => title !== 'Private video' && title !== 'Deleted video');
+            
+            allTitles = allTitles.concat(titles);
+            nextPageToken = data.nextPageToken;
+        } while (nextPageToken);
+
+        if (allTitles.length > 0) {
+            const currentVal = resourceTopicsInput.value;
+            resourceTopicsInput.value = currentVal ? currentVal + '\n' + allTitles.join('\n') : allTitles.join('\n');
+            ytLinkInput.value = ''; 
+        } else {
+            ytError.innerText = 'Liste boş veya videolar gizli.';
+            ytError.classList.remove('hidden');
+        }
+    } catch (err) {
+        console.error(err);
+        ytError.innerText = 'Videolar çekilirken hata oluştu. Linki kontrol et.';
+        ytError.classList.remove('hidden');
+    } finally {
+        btnFetchYt.disabled = false;
+        btnFetchYt.innerText = 'Videoları Aktar';
+    }
+});
+
+// ════════════════════════════════════════════════════════════════════════
+//  TESSERACT.JS OCR LOGIC (KİTAP İÇİNDEKİLER OKUMA)
+// ════════════════════════════════════════════════════════════════════════
+const bookImageInput = document.getElementById('book-image-input');
+const btnReadImage = document.getElementById('btn-read-image');
+const ocrStatus = document.getElementById('ocr-status');
+const ocrError = document.getElementById('ocr-error');
+let selectedFile = null;
+
+bookImageInput.addEventListener('change', (e) => {
+    selectedFile = e.target.files[0];
+    const label = document.querySelector('label[for="book-image-input"]');
+    
+    if (selectedFile) {
+        label.innerText = selectedFile.name;
+        label.classList.replace('bg-white', 'bg-blue-100');
+        btnReadImage.disabled = false;
+    } else {
+        label.innerText = 'Fotoğraf Seç...';
+        label.classList.replace('bg-blue-100', 'bg-white');
+        btnReadImage.disabled = true;
+    }
+});
+
+btnReadImage.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
+    ocrError.classList.add('hidden');
+    ocrStatus.classList.remove('hidden');
+    btnReadImage.disabled = true;
+    btnReadImage.innerText = 'Okunuyor...';
+
+    try {
+        const ret = await Tesseract.recognize(selectedFile, 'tur');
+        const text = ret.data.text;
+        
+        const cleanedLines = text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 2);
+
+        if(cleanedLines.length > 0) {
+            const currentVal = resourceTopicsInput.value;
+            resourceTopicsInput.value = currentVal ? currentVal + '\n' + cleanedLines.join('\n') : cleanedLines.join('\n');
+        } else {
+            ocrError.innerText = "Yazı bulunamadı. Lütfen daha net bir fotoğraf seçin.";
+            ocrError.classList.remove('hidden');
+        }
+    } catch(err) {
+        console.error(err);
+        ocrError.innerText = "Fotoğraf okunurken bir hata oluştu.";
+        ocrError.classList.remove('hidden');
+    } finally {
+        ocrStatus.classList.add('hidden');
+        btnReadImage.disabled = false;
+        btnReadImage.innerText = 'İçindekileri Oku';
+        selectedFile = null;
+        bookImageInput.value = '';
+        const label = document.querySelector('label[for="book-image-input"]');
+        label.innerText = 'Fotoğraf Seç...';
+        label.classList.replace('bg-blue-100', 'bg-white');
+    }
+});
+
+// ════════════════════════════════════════════════════════════════════════
 //  CUSTOM RESOURCES
 // ════════════════════════════════════════════════════════════════════════
 const resourceModal = document.getElementById('resource-modal');
@@ -625,7 +799,19 @@ const btnSubmitResource = document.getElementById('btn-submit-resource');
 
 function showResourceModal() {
     if (!currentUser) { showWarningToast(); return; }
-    resourceError.classList.add('hidden'); resourceForm.reset();
+    resourceError.classList.add('hidden'); 
+    ytError.classList.add('hidden');
+    ocrError.classList.add('hidden');
+    resourceForm.reset();
+    
+    // OCR reset
+    selectedFile = null;
+    bookImageInput.value = '';
+    const label = document.querySelector('label[for="book-image-input"]');
+    label.innerText = 'Fotoğraf Seç...';
+    label.classList.replace('bg-blue-100', 'bg-white');
+    btnReadImage.disabled = true;
+
     openModal(resourceModal, resourceModalContent);
 }
 function hideResourceModal() { closeModal(resourceModal, resourceModalContent, () => resourceForm.reset()); }

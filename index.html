@@ -166,7 +166,7 @@
     <div id="tab-exam" class="tab-content">
 
         <!-- Deneme Ekle Butonu -->
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-slate-800">Deneme Analizi</h2>
                 <p class="text-sm text-slate-500 mt-0.5">Denemelerini kaydet, net gelişimini ve eksik konularını takip et.</p>
@@ -189,6 +189,14 @@
 
         <!-- Exam Content (shown when logged in) -->
         <div id="exam-content" class="hidden space-y-8">
+            
+            <!-- TYT / AYT Sub Tabs (YENİ EKLENEN KISIM) -->
+            <div class="flex justify-center mb-2">
+                <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 border border-slate-100">
+                    <button id="subtab-tyt" class="px-8 py-2.5 rounded-lg text-sm font-bold bg-white text-indigo-600 shadow-sm transition-all">TYT Analizi</button>
+                    <button id="subtab-ayt" class="px-8 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition-all">AYT Analizi</button>
+                </div>
+            </div>
 
             <!-- Stats Summary Row -->
             <div id="exam-stats-row" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
@@ -303,6 +311,21 @@
             </div>
         </div>
         <form id="exam-form" class="p-8 pt-0 space-y-5">
+            
+            <!-- SINAV TÜRÜ SEÇİCİ (YENİ EKLENEN KISIM) -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Sınav Türü</label>
+                <div class="flex gap-6 p-1 border border-slate-200 rounded-xl bg-slate-50">
+                    <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-white py-2.5 rounded-lg border border-slate-200 shadow-sm transition-all hover:bg-slate-50">
+                        <input type="radio" name="exam-type" value="tyt" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                        <span class="font-bold text-slate-700 text-sm">TYT Denemesi</span>
+                    </label>
+                    <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-white py-2.5 rounded-lg border border-slate-200 shadow-sm transition-all hover:bg-slate-50">
+                        <input type="radio" name="exam-type" value="ayt" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+                        <span class="font-bold text-slate-700 text-sm">AYT Denemesi</span>
+                    </label>
+                </div>
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -311,7 +334,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1.5">Yayın / Kaynak Adı</label>
-                    <input type="text" id="exam-publisher" placeholder="Örn: TYT Deneme - Hız Yayınları" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300">
+                    <input type="text" id="exam-publisher" placeholder="Örn: Hız Yayınları" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder:text-slate-300">
                 </div>
             </div>
 
@@ -339,14 +362,19 @@
 
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Yanlış Yapılan Konular <span class="font-normal text-slate-400">(birden fazla seçebilirsin)</span></label>
-                <div class="mb-3">
+                
+                <!-- TYT KONULARI KUTUSU -->
+                <div id="tyt-topics-container" class="mb-3 hidden">
                     <p class="text-xs font-bold text-indigo-500 uppercase tracking-wide mb-2">TYT Konuları</p>
                     <div id="exam-tyt-tags" class="flex flex-wrap gap-1.5"></div>
                 </div>
-                <div>
+                
+                <!-- AYT KONULARI KUTUSU -->
+                <div id="ayt-topics-container" class="hidden">
                     <p class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-2">AYT Konuları</p>
                     <div id="exam-ayt-tags" class="flex flex-wrap gap-1.5"></div>
                 </div>
+                
                 <div class="mt-2">
                     <span id="selected-topics-count" class="text-xs font-semibold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">0 konu seçildi</span>
                 </div>
@@ -501,6 +529,8 @@ let selectedWrongTopics = new Set();
 let netLineChart    = null;
 let weakBarChart    = null;
 
+let activeExamType  = 'tyt'; // TYT veya AYT sekmesi için takip değişkeni
+
 const colorPalette = [
     { from:'from-violet-500', to:'to-violet-400', text:'text-violet-600', badge:'text-violet-500', dot:'bg-violet-500', hover:'group-hover:border-violet-500' },
     { from:'from-rose-500',   to:'to-rose-400',   text:'text-rose-600',   badge:'text-rose-500',   dot:'bg-rose-500',   hover:'group-hover:border-rose-500'   },
@@ -542,6 +572,12 @@ function showSaveToast(msg='İlerlemen kaydedildi') {
 }
 function calcNet(correct, wrong) { return correct - (wrong / 4); }
 
+// Aktif seçime (TYT/AYT) göre denemeleri filtreleyen fonksiyon
+function getFilteredExams() {
+    // Eski kaydedilen verilerde type yoksa onları TYT kabul eder (geriye dönük uyumluluk)
+    return mockExams.filter(e => (e.type || 'tyt') === activeExamType);
+}
+
 // ════════════════════════════════════════════════════════════════════════
 //  TABS
 // ════════════════════════════════════════════════════════════════════════
@@ -562,6 +598,24 @@ function updateExamTabVisibility() {
     if (currentUser) { prompt.classList.add('hidden'); content.classList.remove('hidden'); }
     else             { prompt.classList.remove('hidden'); content.classList.add('hidden'); }
 }
+
+// ── EXAM SUB-TABS (TYT / AYT) ──────────────────────────────────────────
+const btnSubTyt = document.getElementById('subtab-tyt');
+const btnSubAyt = document.getElementById('subtab-ayt');
+
+btnSubTyt.addEventListener('click', () => {
+    activeExamType = 'tyt';
+    btnSubTyt.className = 'px-8 py-2.5 rounded-lg text-sm font-bold bg-white text-indigo-600 shadow-sm transition-all';
+    btnSubAyt.className = 'px-8 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition-all';
+    renderExams();
+});
+
+btnSubAyt.addEventListener('click', () => {
+    activeExamType = 'ayt';
+    btnSubAyt.className = 'px-8 py-2.5 rounded-lg text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all';
+    btnSubTyt.className = 'px-8 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition-all';
+    renderExams();
+});
 
 // ════════════════════════════════════════════════════════════════════════
 //  AUTH
@@ -885,7 +939,6 @@ function createResourceCard(r, color) {
     const pct   = total ? Math.round(done/total*100) : 0;
     const el    = document.createElement('div');
     el.id       = `card-${r.id}`;
-    // Eklendi: cursor-pointer
     el.className = 'bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 hover:shadow-md transition-shadow relative group cursor-pointer';
     el.innerHTML = `
         <button data-id="${r.id}" data-name="${esc(r.name)}" class="delete-res-btn absolute top-5 right-5 p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100">
@@ -900,9 +953,7 @@ function createResourceCard(r, color) {
         </div>
         <p id="cnt-${r.id}" class="text-sm font-medium text-slate-500 text-right">${done} / ${total} Adım Tamamlandı</p>`;
         
-    // Kartın kendisine tıklandığında modal'ı aç
     el.addEventListener('click', (e) => {
-        // Çöp kutusuna tıklandıysa modal'ı açma
         if (e.target.closest('.delete-res-btn')) return;
         openResourceDetailModal(r, color);
     });
@@ -936,14 +987,14 @@ function createCustomCheckbox(r, topic, index, color) {
         const span = label.querySelector('span');
         if (e.target.checked) { span.classList.add('text-slate-400','line-through'); span.classList.remove('text-slate-700'); }
         else                  { span.classList.remove('text-slate-400','line-through'); span.classList.add('text-slate-700'); }
-        // update card
+        
         const total = r.topics.length;
         const done  = r.topics.filter(t => r.progress?.[t]).length;
         const pct   = total ? Math.round(done/total*100) : 0;
         const pctEl = document.getElementById(`pct-${r.id}`); if(pctEl) pctEl.innerText = `${pct}%`;
         const barEl = document.getElementById(`bar-${r.id}`); if(barEl) barEl.style.width = `${pct}%`;
         const cntEl = document.getElementById(`cnt-${r.id}`); if(cntEl) cntEl.innerText = `${done} / ${total} Adım Tamamlandı`;
-        // save
+        
         setTimeout(async () => {
             try {
                 await setDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'custom_resources',r.id), { name:r.name, topics:r.topics, progress:r.progress||{} }, {merge:true});
@@ -993,7 +1044,29 @@ const examForm  = document.getElementById('exam-form');
 const examError = document.getElementById('exam-error');
 const btnSubmitExam = document.getElementById('btn-submit-exam');
 
-// -- Net auto-calculator
+// Formdaki Sınav Türü Radio Butonları Değişince Çalışacaklar
+const examTypeRadios = document.querySelectorAll('input[name="exam-type"]');
+const tytTopicsContainer = document.getElementById('tyt-topics-container');
+const aytTopicsContainer = document.getElementById('ayt-topics-container');
+
+examTypeRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        // Yeni bir tipe tıklandığında seçili konuları temizle
+        selectedWrongTopics.clear();
+        updateSelectedCount();
+        document.querySelectorAll('.topic-tag.selected').forEach(el => el.classList.remove('selected'));
+
+        if (e.target.value === 'tyt') {
+            tytTopicsContainer.classList.remove('hidden');
+            aytTopicsContainer.classList.add('hidden');
+        } else {
+            tytTopicsContainer.classList.add('hidden');
+            aytTopicsContainer.classList.remove('hidden');
+        }
+    });
+});
+
+// Net auto-calculator
 ['exam-correct','exam-wrong','exam-blank'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateNetDisplay);
 });
@@ -1004,7 +1077,7 @@ function updateNetDisplay() {
     document.getElementById('exam-net-display').innerText = net.toFixed(2);
 }
 
-// -- Build topic tag selectors inside modal
+// Build topic tag selectors inside modal
 function buildTopicTags() {
     const tytContainer = document.getElementById('exam-tyt-tags');
     const aytContainer = document.getElementById('exam-ayt-tags');
@@ -1049,8 +1122,19 @@ function showExamModal() {
     if (!currentUser) { showWarningToast(); return; }
     examError.classList.add('hidden');
     examForm.reset();
+    
+    // Modal açıldığında formdaki radio'yu aktif sekmeye göre eşitle
+    document.querySelector(`input[name="exam-type"][value="${activeExamType}"]`).checked = true;
+    
+    if(activeExamType === 'tyt') {
+        tytTopicsContainer.classList.remove('hidden');
+        aytTopicsContainer.classList.add('hidden');
+    } else {
+        tytTopicsContainer.classList.add('hidden');
+        aytTopicsContainer.classList.remove('hidden');
+    }
+
     document.getElementById('exam-net-display').innerText = '0.00';
-    // set today's date
     document.getElementById('exam-date').valueAsDate = new Date();
     buildTopicTags();
     openModal(examModal, examModalContent);
@@ -1062,6 +1146,7 @@ document.getElementById('btn-close-exam-modal').addEventListener('click',  hideE
 
 examForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const type      = document.querySelector('input[name="exam-type"]:checked').value; // Sınav türünü çekiyoruz
     const date      = document.getElementById('exam-date').value;
     const publisher = document.getElementById('exam-publisher').value.trim();
     const correct   = parseFloat(document.getElementById('exam-correct').value) || 0;
@@ -1078,12 +1163,20 @@ examForm.addEventListener('submit', async (e) => {
 
     try {
         const ref  = collection(db,'artifacts',appId,'users',currentUser.uid,'mock_exams');
-        const data = { date, publisher, correct, wrong, blank, net, wrongTopics: wrongTopicsArr, notes, createdAt: serverTimestamp() };
+        // Type bilgisini veritabanına ekliyoruz
+        const data = { type, date, publisher, correct, wrong, blank, net, wrongTopics: wrongTopicsArr, notes, createdAt: serverTimestamp() };
         const docRef = await addDoc(ref, data);
         mockExams.push({ id: docRef.id, ...data });
-        // sort by date ascending
         mockExams.sort((a,b) => a.date.localeCompare(b.date));
-        renderExams();
+        
+        // Eğer kaydettiği denemenin türüyle, şu an baktığı sekme farklıysa, kaydettiği sekmeye geçirelim.
+        if (activeExamType !== type) {
+            if(type === 'tyt') document.getElementById('subtab-tyt').click();
+            else document.getElementById('subtab-ayt').click();
+        } else {
+            renderExams();
+        }
+
         hideExamModal();
         showSaveToast('Deneme kaydedildi! 📊');
     } catch(err) { console.error(err); examError.innerText='Kaydetme sırasında hata oluştu.'; examError.classList.remove('hidden'); }
@@ -1101,13 +1194,16 @@ function renderExams() {
 }
 
 function renderExamStats() {
+    const filteredExams = getFilteredExams();
     const row = document.getElementById('exam-stats-row');
-    if (!mockExams.length) { row.innerHTML=''; return; }
-    const nets     = mockExams.map(e => e.net);
+    
+    if (!filteredExams.length) { row.innerHTML=''; return; }
+    
+    const nets     = filteredExams.map(e => e.net);
     const lastNet  = nets[nets.length-1];
     const bestNet  = Math.max(...nets);
     const avgNet   = nets.reduce((a,b)=>a+b,0)/nets.length;
-    const totalWrongTopics = mockExams.flatMap(e => e.wrongTopics||[]);
+    const totalWrongTopics = filteredExams.flatMap(e => e.wrongTopics||[]);
     const uniqueWeak = [...new Set(totalWrongTopics)].length;
 
     const stats = [
@@ -1126,14 +1222,15 @@ function renderExamStats() {
 }
 
 function renderExamList() {
+    const filteredExams = getFilteredExams();
     const list   = document.getElementById('exam-list');
     const noExam = document.getElementById('no-exams');
     list.innerHTML = '';
-    if (!mockExams.length) { noExam.classList.remove('hidden'); return; }
+    
+    if (!filteredExams.length) { noExam.classList.remove('hidden'); return; }
     noExam.classList.add('hidden');
 
-    // Show newest first
-    [...mockExams].reverse().forEach(exam => {
+    [...filteredExams].reverse().forEach(exam => {
         const netColor = exam.net >= 20 ? 'text-emerald-600' : exam.net >= 10 ? 'text-amber-600' : 'text-rose-600';
         const netBg    = exam.net >= 20 ? 'bg-emerald-50 border-emerald-200' : exam.net >= 10 ? 'bg-amber-50 border-amber-200' : 'bg-rose-50 border-rose-200';
         const dateStr  = exam.date ? new Date(exam.date + 'T00:00:00').toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'}) : '';
@@ -1149,6 +1246,7 @@ function renderExamList() {
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-sm font-bold text-slate-800">${esc(exam.publisher || 'Deneme')}</span>
                         <span class="text-xs text-slate-400 font-medium">${dateStr}</span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 text-slate-500 uppercase">${exam.type || 'TYT'}</span>
                     </div>
                     <div class="flex items-center gap-4 mt-2 text-sm font-semibold">
                         <span class="text-emerald-600">✓ ${exam.correct} D</span>
@@ -1181,16 +1279,25 @@ function renderExamList() {
 }
 
 function renderNetLineChart() {
+    const filteredExams = getFilteredExams();
     const ctx = document.getElementById('net-line-chart');
     const noMsg = document.getElementById('no-line-chart');
-    if (!mockExams.length) { noMsg.classList.remove('hidden'); return; }
+    
+    if (!filteredExams.length) { 
+        noMsg.classList.remove('hidden'); 
+        if (netLineChart) { netLineChart.destroy(); netLineChart = null; }
+        return; 
+    }
+    
     noMsg.classList.add('hidden');
 
-    const labels = mockExams.map(e => {
+    const labels = filteredExams.map(e => {
         const d = new Date(e.date + 'T00:00:00');
         return `${d.getDate()}.${d.getMonth()+1}`;
     });
-    const nets = mockExams.map(e => parseFloat(e.net.toFixed(2)));
+    const nets = filteredExams.map(e => parseFloat(e.net.toFixed(2)));
+    const lineColor = activeExamType === 'tyt' ? '#6366f1' : '#10b981'; // TYT için mor, AYT için yeşil
+    const bgColor   = activeExamType === 'tyt' ? 'rgba(99,102,241,0.08)' : 'rgba(16,185,129,0.08)';
 
     if (netLineChart) netLineChart.destroy();
     netLineChart = new Chart(ctx, {
@@ -1200,10 +1307,10 @@ function renderNetLineChart() {
             datasets: [{
                 label: 'Net',
                 data: nets,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.08)',
+                borderColor: lineColor,
+                backgroundColor: bgColor,
                 borderWidth: 2.5,
-                pointBackgroundColor: '#6366f1',
+                pointBackgroundColor: lineColor,
                 pointRadius: 5,
                 pointHoverRadius: 7,
                 tension: 0.35,
@@ -1223,20 +1330,20 @@ function renderNetLineChart() {
 }
 
 function renderWeakTopicsAnalysis() {
+    const filteredExams = getFilteredExams();
     const barCtx = document.getElementById('weak-bar-chart');
     const noBar  = document.getElementById('no-bar-chart');
     const listEl = document.getElementById('weak-topics-list');
     const noWeak = document.getElementById('no-weak-topics');
 
-    // Count topic frequencies
     const freq = {};
-    mockExams.forEach(e => (e.wrongTopics||[]).forEach(t => { freq[t] = (freq[t]||0)+1; }));
+    filteredExams.forEach(e => (e.wrongTopics||[]).forEach(t => { freq[t] = (freq[t]||0)+1; }));
     const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
 
-    // Table
     listEl.innerHTML = '';
-    if (!sorted.length) { noWeak.classList.remove('hidden'); }
-    else {
+    if (!sorted.length) { 
+        noWeak.classList.remove('hidden'); 
+    } else {
         noWeak.classList.add('hidden');
         const maxFreq = sorted[0][1];
         sorted.forEach(([topic, count], i) => {
@@ -1260,8 +1367,12 @@ function renderWeakTopicsAnalysis() {
         });
     }
 
-    // Bar chart
-    if (!sorted.length) { noBar.classList.remove('hidden'); return; }
+    if (!sorted.length) { 
+        noBar.classList.remove('hidden'); 
+        if (weakBarChart) { weakBarChart.destroy(); weakBarChart = null; }
+        return; 
+    }
+    
     noBar.classList.add('hidden');
     const top8   = sorted.slice(0,8);
     const labels = top8.map(([t]) => t.length > 18 ? t.slice(0,16)+'…' : t);
